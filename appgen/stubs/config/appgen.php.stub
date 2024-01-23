@@ -13,6 +13,18 @@ return [
     */
     'app_name' => '{{app_name}}',
 
-
-    // Add other configuration parameters as needed
+    'generator_menu' => [
+        [
+            'label' => 'Dashboard',
+            'url' => 'mlab-generator',
+        ],
+        [
+            'label' => 'CRUD Manager',
+            'url' => 'crud-manager',
+        ],
+        [
+            'label' => 'User & Permission Manager',
+            'url' => 'user-manager',
+        ],
+    ],
 ];

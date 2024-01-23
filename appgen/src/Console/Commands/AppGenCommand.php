@@ -50,14 +50,34 @@ class AppGenCommand extends Command
         // Path to the destination views directory
         $viewsPath = resource_path('views');
 
-        // Path to the views stub file
-        $viewsStubPath = __DIR__ . '/../../../stubs/views/welcome_page.blade.php.stub';
+        // Path to the views stub directory
+        $viewsStubPath = __DIR__ . '/../../../stubs/views';
 
-        // Copy the views stub to the destination views directory
-        File::copy($viewsStubPath, "$viewsPath/welcome_page.blade.php");
+        // Copy all stub files to the project
+        $this->publishStubs($viewsStubPath, $viewsPath);
 
-        $this->info("Creating application: $appName");
-        $this->info("Configuration published successfully.");
+        // Path to the destination routes directory
+        $routesPath = base_path('routes');
+
+        // Path to the routes stub file
+        $routesStubPath = __DIR__ . '/../../../stubs/routes/generator.php';
+
+        // Copy the routes stub to the destination routes directory
+        File::copy($routesStubPath, "$routesPath/generator.php");
+
+        // Modify the main web.php file to include the generator routes
+        $this->modifyWebRoutes();
+
+        // Path to the destination controllers directory
+        $controllersPath = app_path('Http/Controllers');
+
+        // Path to the controllers stub directory
+        $controllersStubPath = __DIR__ . '/../../../stubs/controllers';
+
+        // Copy the generator controller stub to the project
+        $this->publishController($controllersStubPath, $controllersPath);
+
+        $this->info("Application Generated!");
     }
 
     /**
@@ -77,5 +97,74 @@ class AppGenCommand extends Command
         }
 
         File::put($destinationPath, $content);
+    }
+
+    /**
+     * Copy all stub files to the project.
+     *
+     * @param  string  $stubsPath
+     * @param  string  $destinationPath
+     * @return void
+     */
+    protected function publishStubs($stubsPath, $destinationPath)
+    {
+        // Get all subdirectories in the stub directory
+        $subdirectories = File::directories($stubsPath);
+
+        // Loop through each subdirectory
+        foreach ($subdirectories as $subdirectory) {
+            // Get the subdirectory name without the path
+            $subdirectoryName = basename($subdirectory);
+
+            // Get all files in the subdirectory
+            $files = File::allFiles($subdirectory);
+
+            // Loop through each file and copy it to the destination
+            foreach ($files as $file) {
+                // Get the file name without the path
+                $fileName = $file->getFilename();
+
+                // Determine the destination directory
+                $destinationDirectory = "$destinationPath/$subdirectoryName";
+
+                // Make sure the destination directory exists
+                File::makeDirectory($destinationDirectory, 0755, true, true);
+
+                // Copy the file to the destination directory
+                File::copy($file->getPathname(), "$destinationDirectory/$fileName");
+            }
+        }
+    }
+
+    /**
+     * Modify the main web.php file to include the generator routes.
+     *
+     * @return void
+     */
+    protected function modifyWebRoutes()
+    {
+        // Path to the main web.php file
+        $webRoutesPath = base_path('routes/web.php');
+
+        // Add an include statement for the generator routes
+        $includeStatement = "include __DIR__.'/generator.php';";
+
+        // Append the include statement to the main web.php file
+        File::append($webRoutesPath, "\n" . $includeStatement);
+    }
+
+    protected function publishController($stubsPath, $destinationPath)
+    {
+        // Path to the generator controller stub file
+        $controllerStubPath = "$stubsPath/MLabGeneratorController.php.stub";
+
+        // Determine the destination directory for controllers
+        $destinationDirectory = app_path('Http/Controllers');
+
+        // Make sure the destination directory exists
+        File::makeDirectory($destinationDirectory, 0755, true, true);
+
+        // Copy the controller stub to the destination directory
+        File::copy($controllerStubPath, "$destinationDirectory/MLabGeneratorController.php");
     }
 }

@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+
+class MLabGeneratorController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        // Your index logic here
+        return view('pages.welcome-page');
+    }
+
+    /**
+     * Display the CRUD manager.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function crudManager()
+    {
+        // Your CRUD manager logic here
+        return view('pages.crud-manager');
+    }
+
+    /**
+     * Display the user manager.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function userManager()
+    {
+        // Your user manager logic here
+        return view('pages.user-manager');
+    }
+
+    public function crudmanGenerateModel()
+    {
+        return 'Success!';
+    }
+}
