@@ -1,0 +1,32 @@
+{
+    "name": "mlab/appgen",
+    "description": "MLab AppGen is a Laravel package designed to accelerate application development by providing a simple command to scaffold a basic application structure. It aims to help developers jumpstart their projects quickly with minimal setup.",
+    "type": "library",
+     "version": "0.0.x-dev",
+    "require": {
+        "php": "^8.1",
+        "laravel/framework": "^10",
+        "illuminate/support": "^10",
+        "phpunit/phpunit": "^10",
+        "spatie/laravel-permission": "^5.8"
+    },
+    "require-dev": {
+        "php": "^8.1",
+        "laravel/framework": "^10",
+        "phpunit/phpunit": "^10",
+        "spatie/laravel-permission": "^5.8"
+    },
+    "license": "Custom License",
+    "autoload": {
+        "psr-4": {
+            "Mlab\\Appgen\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Mukti",
+            "email": "personal.mukti@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}
