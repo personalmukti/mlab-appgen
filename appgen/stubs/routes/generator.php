@@ -14,7 +14,10 @@ use App\Http\Controllers\MLabGeneratorController;
 |
 */
 
+// Main Routes
 Route::get('mlab-generator', [MLabGeneratorController::class, 'index'])->name('generator.index');
 Route::get('crud-manager', [MLabGeneratorController::class, 'crudManager'])->name('generator.crud');
 Route::get('user-manager', [MLabGeneratorController::class, 'userManager'])->name('generator.user');
-Route::get('user-manager', [MLabGeneratorController::class, 'crudmanGenerateModel'])->name('generator.createModel');
+
+// Helper Routes
+Route::post('setup-app', [MLabGeneratorController::class, 'crudmanGenerateModel'])->name('generator.createModel');

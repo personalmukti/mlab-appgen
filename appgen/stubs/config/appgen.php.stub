@@ -27,4 +27,6 @@ return [
             'url' => 'user-manager',
         ],
     ],
+
+    'application-menu' => [],
 ];

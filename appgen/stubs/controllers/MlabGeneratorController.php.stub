@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use App\Http\Requests\MyModelRequest; // Sesuaikan dengan nama request yang sesuai dengan model
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class MLabGeneratorController extends Controller
 {
@@ -40,8 +43,121 @@ class MLabGeneratorController extends Controller
         return view('pages.user-manager');
     }
 
-    public function crudmanGenerateModel()
+    /**
+     * Generate Model based on form input.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function crudmanGenerateModel(Request $request)
     {
-        return 'Success!';
+        // Validasi form sesuai kebutuhan Anda
+        $request->validate([
+            'modelName' => 'required|string',
+            'numFields' => 'required|integer|min:1',
+        ]);
+
+        // Mendapatkan nilai dari checkbox
+        $generateController = $request->has('generateController');
+        $generateMigration = $request->has('generateMigration');
+        $generateValidation = $request->has('generateValidation');
+
+        // Panggil fungsi pembuatan model berdasarkan checkbox yang dipilih
+        $this->generateModel($request->input('modelName'));
+
+        if ($generateController) {
+            $this->generateController($request->input('modelName'));
+        }
+
+        if ($generateMigration) {
+            $this->generateMigration($request->input('modelName'));
+        }
+
+        if ($generateValidation) {
+            $this->generateValidation($request->input('modelName'), $request->input('fields'));
+        }
+
+        // Redirect atau lakukan tindakan lain setelah proses selesai
+        return redirect()->route('generator.index');
+    }
+
+    /**
+     * Generate Model.
+     *
+     * @param string $modelName
+     */
+    private function generateModel($modelName)
+    {
+        Artisan::call('make:model', [
+            'name' => $modelName,
+        ]);
+    }
+
+    /**
+     * Generate Controller.
+     *
+     * @param string $modelName
+     */
+    private function generateController($modelName)
+    {
+        Artisan::call('make:controller', [
+            'name' => $modelName . 'Controller',
+        ]);
+    }
+
+    /**
+     * Generate Migration.
+     *
+     * @param string $modelName
+     */
+    private function generateMigration($modelName)
+    {
+        Artisan::call('make:migration', [
+            'name' => 'create_' . Str::snake(Str::plural($modelName)) . '_table',
+        ]);
+    }
+
+    /**
+     * Generate Validation.
+     *
+     * @param string $modelName
+     * @param array $fields
+     */
+    private function generateValidation($modelName, $fields)
+    {
+        // Buat request khusus untuk model ini
+        Artisan::call('make:request', [
+            'name' => $modelName . 'Request',
+        ]);
+
+        // Isi aturan validasi ke dalam request
+        $validationRequestPath = app_path('Http/Requests/' . $modelName . 'Request.php');
+        $this->fillValidationRules($validationRequestPath, $fields);
+    }
+
+    /**
+     * Isi aturan validasi ke dalam file request.
+     *
+     * @param string $validationRequestPath
+     * @param array $fields
+     */
+    private function fillValidationRules($validationRequestPath, $fields)
+    {
+        // Baca konten existing atau mulai dari awal jika file baru
+        $content = file_exists($validationRequestPath) ? file_get_contents($validationRequestPath) : "<?php\n\nnamespace App\Http\Requests;\n\nuse Illuminate\Foundation\Http\FormRequest;\n\nclass " . $modelName . "Request extends FormRequest\n{\n    public function authorize()\n    {\n        return true;\n    }\n\n    public function rules()\n    {\n        return [\n            // Tambahkan aturan validasi sesuai kebutuhan\n        ];\n    }\n}";
+
+        // Tambahkan aturan validasi untuk setiap field
+        foreach ($fields as $field) {
+            $fieldName = $field['name'] ?? null;
+            $fieldType = $field['type'] ?? null;
+
+            if ($fieldName && $fieldType) {
+                $rule = "'$fieldName' => 'required|$fieldType',";
+                // ...
+            }
+        }
+
+        // Simpan kembali ke file
+        file_put_contents($validationRequestPath, $content);
     }
 }
